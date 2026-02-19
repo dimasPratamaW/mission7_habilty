@@ -1,0 +1,151 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/screen/controller/user_controller.dart';
+import 'package:mission7_habitly/screen/initiate_pages/dashboard_habit.dart';
+import 'package:mission7_habitly/screen/register.dart';
+import 'package:mission7_habitly/widget/custom_field.dart';
+
+import '../style/app_color.dart';
+
+class LoginScreen extends ConsumerStatefulWidget {
+  static const routeName = '/login';
+
+  const LoginScreen({super.key});
+
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  void checkUser(){
+      final getAllUser = ref.read(userProvider);
+
+      final bool isAuthenticated = getAllUser.any((user)=>user.email == emailController.text&&user.password == passwordController.text);
+
+      if(isAuthenticated == true){
+        Navigator.pushReplacementNamed(context, DashboardHabit.routeName);
+      }
+      else{
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("invalid user")));
+      }
+
+
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: Center(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image.asset('assets/logo_app.png', height: 320, width: 320),
+              CustomField(
+                // INSERT EMAIL HERE
+                label: "email@domain.com",
+                controller: emailController,
+                backgroundColor: Colors.white,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Email can’t be empty';
+                  }
+                  return null;
+                },
+              ),
+
+              CustomField(
+                // INSERT PASSWORD
+                label: "password",
+                controller: passwordController,
+                backgroundColor: Colors.white,
+                obsecure: true,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Password can’t be empty';
+                  }
+                  return null;
+                },
+              ),
+
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    minimumSize: const Size(double.infinity, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (!_formKey.currentState!.validate()) return;
+                    checkUser();
+                  },
+                  child: const Text(
+                    "Continue",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 30),
+                child: Row(
+                  children: [
+                    Expanded(child: Divider(thickness: 2)),
+                    Text(' or ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                    Expanded(child: Divider(thickness: 2)),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    minimumSize: const Size(double.infinity, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(10),
+                    ),
+                  ),
+                  onPressed: (){
+                    Navigator.pushReplacementNamed(context, RegisterView.routeName);
+                  },
+                  child: const Text(
+                    "Register Account",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
