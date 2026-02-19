@@ -43,3 +43,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase sensitive files
+# These contain your Project ID and API Keys
+android/app/google-services.json
+lib/firebase_options.dart
+
+# Hive (Local Database)
+# Ignore the actual database files and generated TypeAdapters
+*.hive
+*.g.dart
+hive/
+
+
+# Secret files
+.env*
