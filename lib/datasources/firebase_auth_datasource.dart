@@ -1,0 +1,30 @@
+import 'package:mission7_habitly/datasources/auth_datasource.dart';
+import 'package:mission7_habitly/domain/entities/auth_credentials.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mission7_habitly/models/app_user_model.dart';
+
+
+class FirebaseAuthDatasource implements AuthDatasource{
+  final FirebaseAuth _auth;
+  FirebaseAuthDatasource (this._auth);
+
+  @override
+  Future<AppUserModel> login (AuthCredentials credentials) async{
+    try{
+      if(credentials is EmailAuthCredentials){
+        final userCredential = await _auth.signInWithEmailAndPassword(email: credentials.email, password: credentials.password);
+
+        return AppUserModel.fromFirebaseUser(userCredential.user!);
+      }
+      throw UnsupportedError('unsupported credential type:${credentials.runtimeType}');
+    }
+    catch(e){
+      throw "error";
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    await _auth.signOut();
+  }
+}
