@@ -21,7 +21,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void checkUser(){
+  Future<void> checkUser() async{
+      if (!_formKey.currentState!.validate()) return;
+
       final getAllUser = ref.read(userProvider);
 
       final bool isAuthenticated = getAllUser.any((user)=>user.email == emailController.text&&user.password == passwordController.text);
@@ -93,9 +95,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadiusGeometry.circular(10),
                     ),
                   ),
-                  onPressed: () {
-                    if (!_formKey.currentState!.validate()) return;
-                    checkUser();
+                  onPressed: () async{
+                    await checkUser();
                   },
                   child: const Text(
                     "Continue",

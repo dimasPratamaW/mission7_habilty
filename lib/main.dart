@@ -1,7 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/adapters.dart';
+import 'package:mission7_habitly/firebase_options.dart';
 import 'package:mission7_habitly/models/list_habit_hive.dart';
 import 'package:mission7_habitly/screen/dashboard/main_dashboard.dart';
 import 'package:mission7_habitly/screen/initiate_pages/dashboard_habit.dart';
@@ -19,6 +21,10 @@ void main() async{
   Hive.registerAdapter(ListHabitHiveAdapter());
 
   await Hive.openBox<ListHabitHive>('list_habit');
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
 
