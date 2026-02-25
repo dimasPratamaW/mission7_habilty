@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/domain/entities/auth_credentials.dart';
+import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 import 'package:mission7_habitly/screen/controller/user_controller.dart';
 import 'package:mission7_habitly/screen/initiate_pages/dashboard_habit.dart';
 import 'package:mission7_habitly/screen/register.dart';
@@ -21,21 +23,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<void> checkUser() async{
-      if (!_formKey.currentState!.validate()) return;
+  Future<void> checkUser() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      final getAllUser = ref.read(userProvider);
+    await ref
+        .read(authNotifierProvider.notifier)
+        .login(
+          EmailAuthCredentials(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          ),
+        );
 
-      final bool isAuthenticated = getAllUser.any((user)=>user.email == emailController.text&&user.password == passwordController.text);
+    final authState = ref.read(authNotifierProvider);
 
-      if(isAuthenticated == true){
-        Navigator.pushReplacementNamed(context, DashboardHabit.routeName);
-      }
-      else{
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("invalid user")));
-      }
-
-
+    authState.when(
+      data: (user) {
+        if (user != null) {
+          Navigator.pushReplacementNamed(context, DashboardHabit.routeName);
+        }
+      },
+      error: (e, _) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      },
+      loading: () {},
+    );
   }
 
   @override
@@ -95,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadiusGeometry.circular(10),
                     ),
                   ),
-                  onPressed: () async{
+                  onPressed: () async {
                     await checkUser();
                   },
                   child: const Text(
@@ -114,7 +128,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Row(
                   children: [
                     Expanded(child: Divider(thickness: 2)),
-                    Text(' or ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                    Text(
+                      ' or ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                     Expanded(child: Divider(thickness: 2)),
                   ],
                 ),
@@ -130,8 +150,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadiusGeometry.circular(10),
                     ),
                   ),
-                  onPressed: (){
-                    Navigator.pushReplacementNamed(context, RegisterView.routeName);
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      RegisterView.routeName,
+                    );
                   },
                   child: const Text(
                     "Register Account",

@@ -27,4 +27,19 @@ class FirebaseAuthDatasource implements AuthDatasource{
   Future<void> logout() async {
     await _auth.signOut();
   }
+
+  @override
+  Future<AppUserModel> register (AuthCredentials credentials)async {
+    try{
+      if(credentials is EmailAuthCredentials){
+        final userCredential = await _auth.createUserWithEmailAndPassword(email: credentials.email, password: credentials.password);
+
+        return AppUserModel.fromFirebaseUser(userCredential.user!);
+      }
+      throw UnsupportedError('unsupported credential type:${credentials.runtimeType}');
+    }
+    catch(e){
+      throw "error";
+    }
+  }
 }

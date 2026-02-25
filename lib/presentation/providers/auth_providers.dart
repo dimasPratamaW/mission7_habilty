@@ -23,7 +23,7 @@ final authRepositoryProvider = Provider<AuthRepositories>((ref){
   return AuthRepoImpl(ref.watch(authDataSourceAuthProvider));
 });
 
-// 4 - Notifier (login/logout state)
+// 4 - Notifier (login/logout state/register)
 final authNotifierProvider = AsyncNotifierProvider<AuthNotifier,AppUser?>((){
   return AuthNotifier();
 });

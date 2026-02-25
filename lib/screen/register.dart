@@ -1,17 +1,21 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/domain/entities/auth_credentials.dart';
+import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 import 'package:mission7_habitly/style/app_color.dart';
 import 'package:mission7_habitly/widget/custom_field.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   static const routeName = '/register';
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenLogic();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenLogic();
 }
 
-class _RegisterScreenLogic extends State<RegisterScreen> {
+class _RegisterScreenLogic extends ConsumerState<RegisterScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
@@ -36,6 +40,31 @@ class _RegisterScreenLogic extends State<RegisterScreen> {
     });
   }
 
+  Future<void> addUser()async {
+    if (!_formKey.currentState!.validate()) return;
+
+    await ref.read(authNotifierProvider.notifier).register(EmailAuthCredentials(email: emailInput.text.trim(), password: passwordInput.text.trim()));
+
+    final authState = ref.read(authNotifierProvider);
+
+    authState.when(
+      data: (user) {
+        if (user != null) {
+          // ✅ all fields filled
+          Navigator.pop(context);
+        }
+      },
+      error: (e, _) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      },
+      loading: () {},
+    );
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return RegisterView(
@@ -46,6 +75,7 @@ class _RegisterScreenLogic extends State<RegisterScreen> {
       choosenGender: choosenGender,
       genderDropdown: onGenderChanged,
       genderList: gender,
+      onRegister: addUser,
     );
   }
 }
@@ -58,6 +88,7 @@ class RegisterView extends StatelessWidget {
   final String choosenGender;
   final ValueChanged<String?> genderDropdown;
   final List<String> genderList;
+  final AsyncCallback onRegister;
 
   const RegisterView({
     super.key,
@@ -68,6 +99,7 @@ class RegisterView extends StatelessWidget {
     required this.choosenGender,
     required this.genderDropdown,
     required this.genderList,
+    required this.onRegister,
   });
   static const routeName = '/register';
 
@@ -199,11 +231,7 @@ class RegisterView extends StatelessWidget {
                     borderRadius: BorderRadiusGeometry.circular(10),
                   ),
                 ),
-                onPressed: () {
-                  if (!formKey.currentState!.validate()) return;
-                  // ✅ all fields filled
-                  Navigator.pop(context);
-                },
+                onPressed: onRegister,
                 child: const Text(
                   "Register Account",
                   style: TextStyle(

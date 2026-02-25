@@ -19,4 +19,12 @@ class AuthRepoImpl implements AuthRepositories{
   Future<void> logout() async {
     await _datasource.logout();
   }
+
+  @override
+  Future<AppUser> register(AuthCredentials authcredentials)async {
+    // TODO: implement register
+    final model = await _datasource.register(authcredentials);
+
+    return model;
+  }
 }
