@@ -151,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.pushReplacementNamed(
+                    Navigator.pushNamed(
                       context,
                       RegisterView.routeName,
                     );

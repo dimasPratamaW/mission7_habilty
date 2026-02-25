@@ -16,7 +16,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenLogic extends ConsumerState<RegisterScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   List<String> gender = <String>['laki-laki', 'perempuan', 'tidak bersedia'];
@@ -29,8 +28,10 @@ class _RegisterScreenLogic extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    namaInput.dispose();
     emailInput.dispose();
     passwordInput.dispose();
+    passwordConfirmationInput.dispose();
     super.dispose();
   }
 
@@ -40,17 +41,25 @@ class _RegisterScreenLogic extends ConsumerState<RegisterScreen> {
     });
   }
 
-  Future<void> addUser()async {
+  Future<void> addUser() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(authNotifierProvider.notifier).register(EmailAuthCredentials(email: emailInput.text.trim(), password: passwordInput.text.trim()));
+    await ref
+        .read(authNotifierProvider.notifier)
+        .register(
+          EmailAuthCredentials(
+            email: emailInput.text.trim(),
+            password: passwordInput.text.trim(),
+          ),
+        );
+
+    if (!mounted) return;
 
     final authState = ref.read(authNotifierProvider);
 
     authState.when(
       data: (user) {
         if (user != null) {
-          // ✅ all fields filled
           Navigator.pop(context);
         }
       },
@@ -61,17 +70,16 @@ class _RegisterScreenLogic extends ConsumerState<RegisterScreen> {
       },
       loading: () {},
     );
-
   }
-
 
   @override
   Widget build(BuildContext context) {
     return RegisterView(
-      formKey : _formKey,
-      nama:namaInput,
+      formKey: _formKey,
+      nama: namaInput,
       email: emailInput,
       password: passwordInput,
+      passConfirmation: passwordConfirmationInput,
       choosenGender: choosenGender,
       genderDropdown: onGenderChanged,
       genderList: gender,
@@ -85,6 +93,7 @@ class RegisterView extends StatelessWidget {
   final TextEditingController nama;
   final TextEditingController email;
   final TextEditingController password;
+  final TextEditingController passConfirmation;
   final String choosenGender;
   final ValueChanged<String?> genderDropdown;
   final List<String> genderList;
@@ -96,6 +105,7 @@ class RegisterView extends StatelessWidget {
     required this.nama,
     required this.email,
     required this.password,
+    required this.passConfirmation,
     required this.choosenGender,
     required this.genderDropdown,
     required this.genderList,
@@ -114,7 +124,11 @@ class RegisterView extends StatelessWidget {
           children: [
             SizedBox(height: 20),
             Center(
-              child: Image.asset('assets/logo_app.png', height: 200, width: 200),
+              child: Image.asset(
+                'assets/logo_app.png',
+                height: 200,
+                width: 200,
+              ),
             ),
             Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 40),
@@ -130,7 +144,10 @@ class RegisterView extends StatelessWidget {
                         padding: EdgeInsetsGeometry.directional(start: 24),
                         child: Text(
                           "Full Name",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       SizedBox(height: 4),
@@ -149,7 +166,10 @@ class RegisterView extends StatelessWidget {
                         padding: EdgeInsetsGeometry.directional(start: 24),
                         child: Text(
                           "Email",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       SizedBox(height: 4),
@@ -168,7 +188,10 @@ class RegisterView extends StatelessWidget {
                         padding: EdgeInsetsGeometry.directional(start: 24),
                         child: Text(
                           "Jenis Kelamin",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       SizedBox(height: 10),
@@ -193,12 +216,16 @@ class RegisterView extends StatelessWidget {
                           onSelected: genderDropdown,
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      //Password Field---------------
+                      SizedBox(height: 10),
                       Padding(
                         padding: EdgeInsetsGeometry.directional(start: 24),
                         child: Text(
                           "Password",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       SizedBox(height: 4),
@@ -210,6 +237,33 @@ class RegisterView extends StatelessWidget {
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'cant be empty';
+                          }
+                          return null;
+                        },
+                      ), //--------------
+                      Padding(
+                        padding: EdgeInsetsGeometry.directional(start: 24),
+                        child: Text(
+                          "Password",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      CustomField(
+                        obsecure: true,
+                        label: 'confirm password',
+                        controller: passConfirmation,
+                        backgroundColor: Colors.white,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'cant be empty';
+                          }
+                          if (value != password.text) {
+                            // ← check here
+                            return 'password does not match';
                           }
                           return null;
                         },
@@ -242,7 +296,6 @@ class RegisterView extends StatelessWidget {
                 ),
               ),
             ),
-
           ],
         ),
       ),

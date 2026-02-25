@@ -15,7 +15,7 @@ class AuthNotifier extends AsyncNotifier<AppUser?>{
 
   Future<void> register (AuthCredentials credentials) async{
     state = const AsyncLoading();
-    state = await AsyncValue.guard(()=>ref.read(authRepositoryProvider).login(credentials));
+    state = await AsyncValue.guard(()=>ref.read(authRepositoryProvider).register(credentials));
   }
 
 

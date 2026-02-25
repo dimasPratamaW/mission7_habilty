@@ -3,6 +3,16 @@ import 'package:mission7_habitly/domain/entities/auth_credentials.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mission7_habitly/models/app_user_model.dart';
 
+class AuthException implements Exception {
+  final String code;
+  final String message;
+
+  AuthException(this.code, this.message);
+
+  @override
+  String toString() => message; // ← shows readable message in snackbar
+}
+
 
 class FirebaseAuthDatasource implements AuthDatasource{
   final FirebaseAuth _auth;
@@ -18,8 +28,8 @@ class FirebaseAuthDatasource implements AuthDatasource{
       }
       throw UnsupportedError('unsupported credential type:${credentials.runtimeType}');
     }
-    catch(e){
-      throw "error";
+    on FirebaseAuthException catch(e){
+      throw AuthException(e.code, e.message ?? 'Register failed');
     }
   }
 
@@ -38,8 +48,8 @@ class FirebaseAuthDatasource implements AuthDatasource{
       }
       throw UnsupportedError('unsupported credential type:${credentials.runtimeType}');
     }
-    catch(e){
-      throw "error";
+    on FirebaseAuthException catch(e){
+      throw AuthException(e.code, e.message ?? 'Register failed');
     }
   }
 }
