@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
+import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
 import 'package:mission7_habitly/screen/controller/list_habit_controller.dart';
 import 'package:mission7_habitly/screen/dashboard/main_dashboard.dart';
 import 'package:mission7_habitly/style/app_color.dart';
@@ -15,6 +17,12 @@ class DashboardTime extends ConsumerWidget {
     {'time': '21:00', 'title': 'Evening'},
   ];
 
+  Future<void> addHabit(WidgetRef ref, String habitTitle, String time)async{
+    final uid = ref.read(currentUidProvider);
+    if(uid == null) return;
+    await ref.read(habitNotifierProvider.notifier).addHabit(title: habitTitle, desc: 'initiate daily habit', time: time, uid: uid);
+
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,7 +80,11 @@ class DashboardTime extends ConsumerWidget {
                       ),
                     ),
                     onPressed: () {
-                      ref.read(habitListProvider.notifier).addHabit(habitTitle, "Daily habit", time['time']);
+                      //hive method
+                      // ref.read(habitListProvider.notifier).addHabit(habitTitle, "Daily habit", time['time']);
+
+                      //firestore method
+                      addHabit(ref, habitTitle, time['time']);
 
                       Navigator.pushReplacementNamed(
                         context,

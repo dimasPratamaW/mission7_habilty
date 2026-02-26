@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
+import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
 import 'package:mission7_habitly/screen/controller/list_habit_controller.dart';
 import 'package:mission7_habitly/style/app_color.dart';
 import 'package:mission7_habitly/widget/custom_field.dart';
@@ -25,10 +27,11 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
     super.dispose();
   }
 
+  final formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-
+    final uid = ref.watch(currentUidProvider);
     final List<String> timeOptions = [
       '06:00',
       '09:00',
@@ -122,12 +125,15 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
                   //button register
                   onPressed: () async {
                     if (!formKey.currentState!.validate()) return;
+                    if(uid == null) return;
 
-                      await ref.read(habitListProvider.notifier).addHabit(
-                        titleHabit.text,
-                        descHabit.text,
-                        timeHabit,
-                      );
+                      // await ref.read(habitListProvider.notifier).addHabit(
+                      //   titleHabit.text,
+                      //   descHabit.text,
+                      //   timeHabit,
+                      // );
+
+                    await ref.read(habitNotifierProvider.notifier).addHabit(title: titleHabit.text, desc: descHabit.text, time: timeHabit, uid: uid);
 
                       if(!context.mounted) return;
 

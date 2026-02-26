@@ -1,0 +1,32 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/domain/entities/habit_entity.dart';
+import 'package:mission7_habitly/models/habit_model.dart';
+import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
+
+class HabitNotifier extends AsyncNotifier<List<HabitEntity>> {
+  @override
+  Future<List<HabitModel>> build() async => [];
+
+  Future<void> addHabit({
+    required String title,
+    required String desc,
+    required String time,
+    required String uid,
+  }) async {
+    final habit = HabitEntity(
+      id: '${DateTime.now()}/$uid',
+      title: title,
+      desc: desc,
+      time: time,
+      uid: uid,
+    );
+
+    await ref.read(habitRepositoryProvider).addHabit(habit);
+  }
+
+  Future<void>deleteHabit(String uid, String habitId) async{
+    await ref.read(habitRepositoryProvider).deleteHabit(uid, habitId);
+  }
+}

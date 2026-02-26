@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mission7_habitly/datasources/habit_datasource.dart';
 import 'package:mission7_habitly/models/habit_model.dart';
 
-class FirestoreHabitDatasource {
+class FirestoreHabitDatasource implements HabitDatasource {
   final FirebaseFirestore _firestore;
   FirestoreHabitDatasource(this._firestore);
 

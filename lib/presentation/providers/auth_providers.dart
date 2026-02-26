@@ -27,3 +27,12 @@ final authRepositoryProvider = Provider<AuthRepositories>((ref){
 final authNotifierProvider = AsyncNotifierProvider<AuthNotifier,AppUser?>((){
   return AuthNotifier();
 });
+
+final currentUserProvider = Provider<AppUser?>((ref){
+  final authState = ref.watch(authNotifierProvider);
+  return authState.when(data: (user)=> user, error: (_,__)=>null, loading: ()=> null);
+});
+
+final currentUidProvider = Provider<String?>((ref){
+  return ref.watch(currentUserProvider)?.id;
+});
