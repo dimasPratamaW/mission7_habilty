@@ -1,12 +1,21 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mission7_habitly/domain/entities/app_user.dart';
 import 'package:mission7_habitly/domain/entities/auth_credentials.dart';
 import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 
+import '../../models/app_user_model.dart';
+
 class AuthNotifier extends AsyncNotifier<AppUser?>{
 
   @override
-  Future<AppUser?> build () async => null;
+  Future<AppUser?> build() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      return AppUserModel.fromFirebaseUser(firebaseUser);
+    }
+    return null;
+  }
 
   Future<void> login(AuthCredentials credentials) async{
     state = const AsyncLoading();

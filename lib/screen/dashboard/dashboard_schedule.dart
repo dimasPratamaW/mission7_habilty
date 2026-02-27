@@ -232,7 +232,9 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 8),
+                                  SizedBox(height: 5),
+                                  Text('${activity.date} - ${activity.time}'),
+                                  SizedBox(height: 5),
                                   Text(
                                     activity.title,
                                     style: TextStyle(
@@ -240,62 +242,65 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
                                       fontSize: 14,
                                     ),
                                   ),
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 5),
                                   Text(activity.desc),
                                   SizedBox(height: 10),
-                                  Text(activity.time),
-                                  SizedBox(height: 8),
                                 ],
                               ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  if (!context.mounted) return;
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text("CAREFUL 🙏"),
-                                      content: Text(
-                                        "this ${activity.title} habit will be deleted, are you really sure?",
-                                      ),
-                                      actionsPadding:
+                              Column(
+                                children: [
+                                  Text('Status : ${activity.status}'),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      if (!context.mounted) return;
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text("CAREFUL 🙏"),
+                                          content: Text(
+                                            "this ${activity.title} habit will be deleted, are you really sure?",
+                                          ),
+                                          actionsPadding:
                                           EdgeInsetsDirectional.symmetric(
                                             horizontal: 10,
                                             vertical: 10,
                                           ),
-                                      actions: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xFFF5F5F5),
-                                          ),
-                                          onPressed: () {
-                                            ref
-                                                .read(
+                                          actions: [
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xFFF5F5F5),
+                                              ),
+                                              onPressed: () {
+                                                ref
+                                                    .read(
                                                   habitNotifierProvider
                                                       .notifier,
                                                 )
-                                                .deleteHabit(uid, activity.id);
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("YES"),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text(
-                                            "NO",
-                                            style: TextStyle(
-                                              color: Colors.white,
+                                                    .deleteHabit(uid, activity.id);
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text("YES"),
                                             ),
-                                          ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                              ),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text(
+                                                "NO",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                child: Icon(Icons.delete_forever),
+                                      );
+                                    },
+                                    child: Icon(Icons.delete_forever),
+                                  ),
+                                ]
                               ),
                             ],
                           ),

@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/screen/dashboard/main_dashboard.dart';
 import 'package:mission7_habitly/screen/login.dart';
 import 'package:mission7_habitly/style/app_color.dart';
 
-class SplashScreen extends StatelessWidget {
+import '../presentation/providers/auth_providers.dart';
+
+class SplashScreen extends ConsumerWidget {
   static const routeName = '/';
 
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+
+    final authState = ref.watch(authNotifierProvider);
+
+    authState.whenData((user){
+      if(user != null){
+       WidgetsBinding.instance.addPostFrameCallback((_){
+         Navigator.pushReplacementNamed(context, MainDashboard.routeName);
+       });
+      }
+    });
 
     return Scaffold(
       backgroundColor: colors.background,
