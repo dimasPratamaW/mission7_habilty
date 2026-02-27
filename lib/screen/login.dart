@@ -22,10 +22,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isLoading = false;
 
   Future<void> checkUser() async {
     if (!_formKey.currentState!.validate()) return;
-
+    setState(() => isLoading = true);
     await ref
         .read(authNotifierProvider.notifier)
         .login(
@@ -33,12 +34,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: emailController.text.trim(),
             password: passwordController.text.trim(),
           ),
-        );
-
-
+        ).timeout(Duration(seconds: 15),onTimeout: (){
+          setState(() => isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Connection timeout. Check your internet!')),
+          );
+    });
 
     final authState = ref.read(authNotifierProvider);
-
     authState.when(
       data: (user) {
         if (user != null) {
@@ -112,10 +115,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadiusGeometry.circular(10),
                     ),
                   ),
-                  onPressed: () async {
-                    await checkUser();
-                  },
-                  child: const Text(
+                  onPressed: isLoading ? null : () async => await checkUser(), // ← update
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text( // ← update
                     "Continue",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,

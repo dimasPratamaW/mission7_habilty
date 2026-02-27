@@ -182,7 +182,7 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
                     case HabitFilter.upcoming:
                       return habit.status == 'Upcoming';
                     case HabitFilter.ongoing:
-                      return habit.status == 'upcoming';
+                      return habit.status == 'Ongoing';
                     case HabitFilter.completed:
                       return habit.status == 'Completed';
                   }

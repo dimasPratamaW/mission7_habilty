@@ -17,14 +17,6 @@ class SplashScreen extends ConsumerWidget {
 
     final authState = ref.watch(authNotifierProvider);
 
-    authState.whenData((user){
-      if(user != null){
-       WidgetsBinding.instance.addPostFrameCallback((_){
-         Navigator.pushReplacementNamed(context, MainDashboard.routeName);
-       });
-      }
-    });
-
     return Scaffold(
       backgroundColor: colors.background,
       body: Center(
@@ -57,7 +49,14 @@ class SplashScreen extends ConsumerWidget {
             Text('Keep up your Health!'),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+                final user = ref.read(authNotifierProvider).value;
+                if (user != null) {
+                  // already logged in — skip login
+                  Navigator.pushReplacementNamed(context, MainDashboard.routeName);
+                } else {
+                  // not logged in — go to login
+                  Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+                }
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
