@@ -9,7 +9,7 @@ class HabitRepoImpl implements HabitRepositories{
 
   @override
   Future<void> addHabit(HabitEntity habit) async {
-    await _datasource.addHabit(HabitModel(id: habit.id, title: habit.title, desc: habit.desc, time: habit.time, uid: habit.uid));
+    await _datasource.addHabit(HabitModel(id: habit.id, title: habit.title, desc: habit.desc, time: habit.time,date: habit.date,status: habit.status, uid: habit.uid));
   }
 
   @override

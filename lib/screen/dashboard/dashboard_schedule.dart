@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:mission7_habitly/models/list_habit_hive.dart';
 import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
@@ -29,9 +30,11 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
 
   @override
   Widget build(BuildContext context) {
-
     final uid = ref.watch(currentUidProvider); // ← get uid
     final colors = AppColors.of(context);
+
+    final sortOption = ref.watch(habitSortProvider);
+    final filterOption = ref.watch(habitFilterProvider);
 
     if (uid == null) return const Center(child: CircularProgressIndicator());
 
@@ -76,6 +79,88 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
             ),
           ),
           SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //SORT BUTTON
+              Column(
+                children:[
+                  SizedBox(height: 5,),
+                  Text('Sort by Date'),
+                  Padding(
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 16,vertical: 10),
+                    child: Container(
+                      decoration:BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color:colors.border)
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<HabitSort>(
+                          value: ref.watch(habitSortProvider),
+                          padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
+                          items: const [
+                            DropdownMenuItem(value: HabitSort.dateNewest, child: Text('Newest')),
+                            DropdownMenuItem(value: HabitSort.dateOldest, child: Text('Oldest')),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              ref.read(habitSortProvider.notifier).state = value;
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              //FILTER BUTTON
+              Column(
+                children:[
+                  SizedBox(height: 5,),
+                  Text('Filter by Status'),
+                  Padding(
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 16,vertical: 10),
+                  child: Container(
+                    decoration:BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color:colors.border)
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<HabitFilter>(
+                        value: ref.watch(habitFilterProvider),
+                        padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
+                        items: const [
+                          DropdownMenuItem(
+                            value: HabitFilter.all,
+                            child: Text('All'),
+                          ),
+                          DropdownMenuItem(
+                            value: HabitFilter.upcoming,
+                            child: Text('Upcoming'),
+                          ),
+                          DropdownMenuItem(
+                            value: HabitFilter.ongoing,
+                            child: Text('Ongoing'),
+                          ),
+                          DropdownMenuItem(
+                            value: HabitFilter.completed,
+                            child: Text('Completed'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            ref.read(habitFilterProvider.notifier).state = value;
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
           Padding(
             // text title my Habit
             padding: EdgeInsetsGeometry.directional(start: 10),
@@ -87,21 +172,53 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
           SizedBox(height: 10),
           Expanded(
             child: pullData.when(
+              // used the data FROM pullData
               data: (activities) {
-                if (activities.isEmpty) {
+                //FOR FILTER
+                var filtered = activities.where((habit) {
+                  switch (filterOption) {
+                    case HabitFilter.all:
+                      return true;
+                    case HabitFilter.upcoming:
+                      return habit.status == 'Upcoming';
+                    case HabitFilter.ongoing:
+                      return habit.status == 'upcoming';
+                    case HabitFilter.completed:
+                      return habit.status == 'Completed';
+                  }
+                }).toList();
+
+                switch (sortOption) {
+                  case HabitSort.dateNewest:
+                    filtered.sort((a, b) {
+                      final dateA = DateFormat('dd/MM/yyyy').parse(a.date);
+                      final dateB = DateFormat('dd/MM/yyyy').parse(b.date);
+                      return dateB.compareTo(dateA);
+                    });
+                    break;
+                  case HabitSort.dateOldest:
+                    filtered.sort((a, b) {
+                      final dateA = DateFormat('dd/MM/yyyy').parse(a.date);
+                      final dateB = DateFormat('dd/MM/yyyy').parse(b.date);
+                      return dateA.compareTo(dateB);
+                    });
+                    break;
+                }
+
+                if (filtered.isEmpty) {
                   return const Center(child: Text("No habits yet"));
                 }
-                return RefreshIndicator(  // ← add this
+                return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(habitStreamProvider(uid));
                   },
-                  child: Padding(  // ← your existing code unchanged
+                  child: Padding(
                     padding: const EdgeInsetsGeometry.symmetric(horizontal: 30),
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
-                      itemCount: activities.length,
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        final activity = activities[index];
+                        final activity = filtered[index];
                         return Container(
                           decoration: BoxDecoration(
                             border: Border(
@@ -137,21 +254,42 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text("CAREFUL 🙏"),
-                                      content: Text("this ${activity.title} habit will be deleted, are you really sure?"),
-                                      actionsPadding: EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 10),
+                                      content: Text(
+                                        "this ${activity.title} habit will be deleted, are you really sure?",
+                                      ),
+                                      actionsPadding:
+                                          EdgeInsetsDirectional.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
                                       actions: [
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFF5F5F5)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xFFF5F5F5),
+                                          ),
                                           onPressed: () {
-                                            ref.read(habitNotifierProvider.notifier).deleteHabit(uid, activity.id);
+                                            ref
+                                                .read(
+                                                  habitNotifierProvider
+                                                      .notifier,
+                                                )
+                                                .deleteHabit(uid, activity.id);
                                             Navigator.pop(context);
                                           },
                                           child: const Text("YES"),
                                         ),
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                          onPressed: () => Navigator.pop(context),
-                                          child: const Text("NO", style: TextStyle(color: Colors.white)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text(
+                                            "NO",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -168,7 +306,8 @@ class _DashboardSchedule extends ConsumerState<DashboardSchedule> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => const Center(child: Text('ERROR please ask developer')),
+              error: (err, stack) =>
+                  const Center(child: Text('ERROR please ask developer')),
             ),
           ),
         ],

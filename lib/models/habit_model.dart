@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mission7_habitly/domain/entities/habit_entity.dart';
 
 class HabitModel extends HabitEntity {
@@ -6,6 +7,8 @@ class HabitModel extends HabitEntity {
     required super.title,
     required super.desc,
     required super.time,
+    required super.date,
+    required super.status,
     required super.uid,
   });
 
@@ -15,6 +18,8 @@ class HabitModel extends HabitEntity {
       title: map['title'] ?? '',
       desc: map['desc'] ?? '',
       time: map['time'] ?? '',
+      date: map['date'] ?? '',
+      status: map['status'] ?? '',
       uid: map['uid'] ?? '',
     );
   }
@@ -24,6 +29,8 @@ class HabitModel extends HabitEntity {
       'title': title,
       'desc': desc,
       'time': time,
+      'date':date,
+      'status':status,
       'uid': uid,
     };
   }

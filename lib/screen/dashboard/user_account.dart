@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
+import 'package:mission7_habitly/screen/login.dart';
 
-class UserAccount extends StatelessWidget {
+class UserAccount extends ConsumerWidget {
   const UserAccount({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.account_circle, size: 60),
           const SizedBox(height: 10),
-          Text('email'),
-          const SizedBox(height: 10),
-          Text('password'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Email :'),
+              SizedBox(width: 2,),
+              Text(user?.email??''),
+            ],
+          ),
+          ElevatedButton(onPressed: ()async{
+            await ref.read(authNotifierProvider.notifier).logout();
+            if(!context.mounted)return;
+            Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+          }, child: const Text('logout'))
         ],
       ),
     );

@@ -13,13 +13,18 @@ class HabitNotifier extends AsyncNotifier<List<HabitEntity>> {
     required String title,
     required String desc,
     required String time,
+    required String date,
+    required String status,
     required String uid,
+
   }) async {
     final habit = HabitEntity(
       id: '${DateTime.now()}/$uid',
       title: title,
       desc: desc,
       time: time,
+      date: date,
+      status: status,
       uid: uid,
     );
 

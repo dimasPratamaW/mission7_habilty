@@ -35,11 +35,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         );
 
+
+
     final authState = ref.read(authNotifierProvider);
 
     authState.when(
       data: (user) {
         if (user != null) {
+          if (!mounted) return;
           Navigator.pushReplacementNamed(context, DashboardHabit.routeName);
         }
       },

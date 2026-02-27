@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
 import 'package:mission7_habitly/screen/controller/list_habit_controller.dart';
@@ -20,7 +21,7 @@ class DashboardTime extends ConsumerWidget {
   Future<void> addHabit(WidgetRef ref, String habitTitle, String time)async{
     final uid = ref.read(currentUidProvider);
     if(uid == null) return;
-    await ref.read(habitNotifierProvider.notifier).addHabit(title: habitTitle, desc: 'initiate daily habit', time: time, uid: uid);
+    await ref.read(habitNotifierProvider.notifier).addHabit(title: habitTitle, desc: 'initiate daily habit', time: time,date: DateFormat('dd/MM/yyyy').format(DateTime.now()),status: 'Upcoming', uid: uid);
 
   }
 

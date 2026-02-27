@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:mission7_habitly/presentation/providers/auth_providers.dart';
 import 'package:mission7_habitly/presentation/providers/habit_providers.dart';
 import 'package:mission7_habitly/screen/controller/list_habit_controller.dart';
@@ -18,7 +19,9 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
   final titleHabit = TextEditingController();
   final descHabit = TextEditingController();
   String timeHabit = '06:00';
+  String statusHabit = 'Upcoming';
   DateTime selectedDate = DateTime.now();
+  String formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
 
   @override
   void dispose() {
@@ -26,6 +29,24 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
     descHabit.dispose();
     super.dispose();
   }
+
+  Future<void> pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2028),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        // format to DD/MM/YYYY string
+        formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
+  }
+
 
   final formKey = GlobalKey<FormState>();
 
@@ -39,6 +60,11 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
       '15:00',
       '18:00',
       '21:00',
+    ];
+    final List<String> statusOptions = [
+      'Upcoming',
+      'Ongoing',
+      'Completed',
     ];
 
     final colors = AppColors.of(context);
@@ -81,25 +107,40 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
                   color: Color(0XFFECE6F0),
                   child: Column(
                     children: [
+                      SizedBox(height: 10),
+                      Text('When you do the habit ?'),
                       Padding(
                         padding: EdgeInsetsGeometry.symmetric(
                           horizontal: 20,
-                          vertical: 15,
+                          vertical: 2,
                         ),
-                        child: InputDatePickerFormField(
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2028),
-                          initialDate: selectedDate,
-                          onDateSaved: (date) {
-                            selectedDate = date;
-                          },
+                        child: GestureDetector(
+                          onTap: pickDate,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formattedDate, // ← shows DD/MM/YYYY
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                const Icon(Icons.calendar_today),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text('When we should remind you ?'),
+                      Text('When we should remind you ?'),//time OPTIONS
                       Padding(
-                        padding: EdgeInsetsGeometry.symmetric(vertical: 10),
+                        padding: EdgeInsetsGeometry.symmetric(vertical: 10, horizontal: 20),
                         child: DropdownMenu<String>(
+                          width: double.infinity,
                           initialSelection: timeOptions[0],
                           dropdownMenuEntries: timeOptions.map((value) {
                             return DropdownMenuEntry<String>(
@@ -110,6 +151,26 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
                           onSelected: (value) {
                             if (value != null) {
                               timeHabit = value;
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text('Status of habit?'),
+                      Padding(// Status
+                        padding: EdgeInsetsGeometry.symmetric(vertical: 10, horizontal: 20),
+                        child: DropdownMenu<String>(
+                          width: double.infinity,
+                          initialSelection: statusOptions[0],
+                          dropdownMenuEntries: statusOptions.map((value) {
+                            return DropdownMenuEntry<String>(
+                              value: value,
+                              label: value,
+                            );
+                          }).toList(),
+                          onSelected: (value) {
+                            if (value != null) {
+                              statusHabit = value;
                             }
                           },
                         ),
@@ -133,9 +194,9 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
                       //   timeHabit,
                       // );
 
-                    await ref.read(habitNotifierProvider.notifier).addHabit(title: titleHabit.text, desc: descHabit.text, time: timeHabit, uid: uid);
+                    await ref.read(habitNotifierProvider.notifier).addHabit(title: titleHabit.text, desc: descHabit.text, time: timeHabit,date: formattedDate,status: statusHabit, uid: uid);
 
-                      if(!context.mounted) return;
+                    if(!context.mounted) return;
 
                       await showDialog(
                         context: context,
@@ -151,9 +212,10 @@ class _AddNewHabitState extends ConsumerState<AddNewHabit> {
                         ),
                       );
 
-                      // Clear fields AFTER dialog is closed
-                      titleHabit.clear();
-                      descHabit.clear();
+                    // Clear fields AFTER dialog is closed
+                    titleHabit.clear();
+                    descHabit.clear();
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2FB969),

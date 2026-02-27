@@ -37,7 +37,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(textTheme: GoogleFonts.urbanistTextTheme(Theme.of(context).textTheme)),
+      darkTheme:ThemeData(
+          brightness: Brightness.dark,
+          textTheme: GoogleFonts.urbanistTextTheme(Theme.of(context).textTheme)) ,
+      theme: ThemeData(
+          brightness: Brightness.light,
+          textTheme: GoogleFonts.urbanistTextTheme(Theme.of(context).textTheme)),
+      themeMode: ThemeMode.system,
       initialRoute: SplashScreen.routeName,
       routes: {
         SplashScreen.routeName: (_) => const SplashScreen(),
